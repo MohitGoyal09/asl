@@ -27,7 +27,7 @@ interface Provider {
 }
 
 interface PageProps {
-  params: Promise<{ provider: string }>;
+  params: { provider: string };
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
