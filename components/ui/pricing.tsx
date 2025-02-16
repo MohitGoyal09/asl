@@ -140,11 +140,10 @@ export function Pricing({
                       }
                       format={{
                         style: "currency",
-                        currency: "USD",
+                        currency: "INR",
                         minimumFractionDigits: 0,
                         maximumFractionDigits: 0,
                       }}
-                      formatter={(value: number) => `$${value}`}
                       transformTiming={{
                         duration: 500,
                         easing: "ease-out",
