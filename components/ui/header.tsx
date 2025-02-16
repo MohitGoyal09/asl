@@ -179,7 +179,7 @@ export default function Header() {
                   variant="ghost"
                   className="w-full justify-start"
                   onClick={() => {
-                    router.push("/auth/sign-in");
+                    router.push("/sign-in");
                     setIsOpen(false);
                   }}
                 >
@@ -188,7 +188,7 @@ export default function Header() {
                 <Button
                   className="w-full justify-start"
                   onClick={() => {
-                    router.push("/asl-translator");
+                    router.push("/asl");
                     setIsOpen(false);
                   }}
                 >

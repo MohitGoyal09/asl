@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,24 +26,16 @@ interface Provider {
   reviews: Review[];
 }
 
-type Props = {
+interface PageProps {
   params: { provider: string };
   searchParams: { [key: string]: string | string[] | undefined };
-};
+}
 
-export default function ProviderPage({ params, searchParams }: Props) {
-  const [provider, setProvider] = React.useState<Provider | null>(null);
-
-  React.useEffect(() => {
-    const foundProvider = takerData.find((p) => p.id === params.provider);
-    if (!foundProvider) {
-      notFound();
-    }
-    setProvider(foundProvider as Provider);
-  }, [params.provider]);
+export default function ProviderPage({ params }: PageProps) {
+  const provider = takerData.find((p) => p.id === params.provider);
 
   if (!provider) {
-    return null;
+    notFound();
   }
 
   return (
