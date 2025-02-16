@@ -27,6 +27,12 @@ import { toast } from "sonner";
 import { SparklesText } from "@/components/magicui/sparkles-text";
 import { AuroraText } from "@/components/magicui/aurora-text";
 
+interface ProviderPageProps {
+  params: {
+    provider: string;
+  };
+}
+
 export default function ASLPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
