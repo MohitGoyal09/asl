@@ -26,15 +26,22 @@ interface Provider {
   reviews: Review[];
 }
 
-interface PageProps {
-  params: { provider: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-}
+type PageProps = {
+  params: {
+    provider: string;
+  };
+  searchParams?: { [key: string]: string | string[] | undefined };
+};
 
-export default function ProviderPage({ params }: PageProps) {
-  const provider = takerData.find((p) => p.id === params.provider);
+export default async function ProviderPage({
+  params,
+  searchParams,
+}: PageProps) {
+  const { provider } = params;
 
-  if (!provider) {
+  const providerData = takerData.find((p) => p.id === provider);
+
+  if (!providerData) {
     notFound();
   }
 
@@ -46,8 +53,11 @@ export default function ProviderPage({ params }: PageProps) {
           {/* Profile Picture */}
           <div className="flex-shrink-0">
             <Avatar className="h-32 w-32">
-              <AvatarImage src={provider.profilePicture} alt={provider.name} />
-              <AvatarFallback>{provider.name.slice(0, 2)}</AvatarFallback>
+              <AvatarImage
+                src={providerData.profilePicture}
+                alt={providerData.name}
+              />
+              <AvatarFallback>{providerData.name.slice(0, 2)}</AvatarFallback>
             </Avatar>
           </div>
 
@@ -55,10 +65,10 @@ export default function ProviderPage({ params }: PageProps) {
           <div className="space-y-4 flex-grow">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold">{provider.name}</h1>
+                <h1 className="text-3xl font-bold">{providerData.name}</h1>
                 <div className="flex items-center gap-2 text-muted-foreground mt-2">
                   <MapPin className="h-4 w-4" />
-                  <span>{provider.location}</span>
+                  <span>{providerData.location}</span>
                 </div>
               </div>
               <div className="flex gap-3">
@@ -73,13 +83,13 @@ export default function ProviderPage({ params }: PageProps) {
               </div>
             </div>
 
-            <p className="text-lg text-muted-foreground">{provider.bio}</p>
+            <p className="text-lg text-muted-foreground">{providerData.bio}</p>
 
             {/* Specializations */}
             <div className="space-y-2">
               <h3 className="font-semibold">Specializations</h3>
               <div className="flex flex-wrap gap-2">
-                {provider.specializations.map((spec) => (
+                {providerData.specializations.map((spec) => (
                   <Badge key={spec} variant="secondary">
                     {spec}
                   </Badge>
@@ -100,7 +110,7 @@ export default function ProviderPage({ params }: PageProps) {
               Languages
             </h3>
             <div className="flex flex-wrap gap-2">
-              {provider.languages.map((lang) => (
+              {providerData.languages.map((lang) => (
                 <Badge key={lang}>{lang}</Badge>
               ))}
             </div>
@@ -111,13 +121,13 @@ export default function ProviderPage({ params }: PageProps) {
               <Clock className="h-5 w-5" />
               Availability
             </h3>
-            <p className="text-muted-foreground">{provider.availability}</p>
+            <p className="text-muted-foreground">{providerData.availability}</p>
           </div>
 
           <div className="space-y-4">
             <h3 className="text-xl font-semibold">Hourly Rate</h3>
             <p className="text-2xl font-bold text-primary">
-              ${provider.hourlyRate}/hr
+              ${providerData.hourlyRate}/hr
             </p>
           </div>
         </Card>
@@ -128,13 +138,13 @@ export default function ProviderPage({ params }: PageProps) {
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-semibold">Reviews</h3>
               <Badge variant="secondary">
-                {provider.reviews.length} Reviews
+                {providerData.reviews.length} Reviews
               </Badge>
             </div>
 
             <div className="space-y-4">
-              {provider.reviews.length > 0 ? (
-                provider.reviews.map((review: Review, index) => (
+              {providerData.reviews.length > 0 ? (
+                providerData.reviews.map((review: Review, index) => (
                   <div
                     key={index}
                     className="border-b border-border last:border-0 pb-4 last:pb-0"
