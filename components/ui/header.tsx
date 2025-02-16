@@ -2,177 +2,204 @@
 
 import { Button } from "@/components/ui/button";
 import {
-    NavigationMenu,
-    NavigationMenuContent,
-    NavigationMenuItem,
-    NavigationMenuLink,
-    NavigationMenuList,
-    NavigationMenuTrigger,
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Menu, MoveRight, X } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { useRouter } from "next/navigation";
+import { FaEye } from "react-icons/fa";
 
-function Header1() {
-    const navigationItems = [
-        {
-            title: "Home",
-            href: "/",
-            description: "",
-        },
-        {
-            title: "Product",
-            description: "Managing a small business today is already tough.",
-            items: [
-                {
-                    title: "Reports",
-                    href: "/reports",
-                },
-                {
-                    title: "Statistics",
-                    href: "/statistics",
-                },
-                {
-                    title: "Dashboards",
-                    href: "/dashboards",
-                },
-                {
-                    title: "Recordings",
-                    href: "/recordings",
-                },
-            ],
-        },
-        {
-            title: "Company",
-            description: "Managing a small business today is already tough.",
-            items: [
-                {
-                    title: "About us",
-                    href: "/about",
-                },
-                {
-                    title: "Fundraising",
-                    href: "/fundraising",
-                },
-                {
-                    title: "Investors",
-                    href: "/investors",
-                },
-                {
-                    title: "Contact us",
-                    href: "/contact",
-                },
-            ],
-        },
-    ];
+// Define a type for Navigation Item for better type safety and readability
+type NavItem = {
+  title: string;
+  href: string; // href is required now in the type
+  description?: string; // Optional description for dropdown items
+  items?: { title: string; href: string }[]; // Optional sub-items for dropdowns
+};
 
-    const [isOpen, setOpen] = useState(false);
-    return (
-        <header className="w-full z-40 fixed top-0 left-0 bg-background">
-            <div className="container relative mx-auto min-h-20 flex gap-4 flex-row lg:grid lg:grid-cols-3 items-center">
-                <div className="justify-start items-center gap-4 lg:flex hidden flex-row">
-                    <NavigationMenu className="flex justify-start items-start">
-                        <NavigationMenuList className="flex justify-start gap-4 flex-row">
-                            {navigationItems.map((item) => (
-                                <NavigationMenuItem key={item.title}>
-                                    {item.href ? (
-                                        <>
-                                            <NavigationMenuLink>
-                                                <Button variant="ghost">{item.title}</Button>
-                                            </NavigationMenuLink>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <NavigationMenuTrigger className="font-medium text-sm">
-                                                {item.title}
-                                            </NavigationMenuTrigger>
-                                            <NavigationMenuContent className="!w-[450px] p-4">
-                                                <div className="flex flex-col lg:grid grid-cols-2 gap-4">
-                                                    <div className="flex flex-col h-full justify-between">
-                                                        <div className="flex flex-col">
-                                                            <p className="text-base">{item.title}</p>
-                                                            <p className="text-muted-foreground text-sm">
-                                                                {item.description}
-                                                            </p>
-                                                        </div>
-                                                        <Button size="sm" className="mt-10">
-                                                            Book a call today
-                                                        </Button>
-                                                    </div>
-                                                    <div className="flex flex-col text-sm h-full justify-end">
-                                                        {item.items?.map((subItem) => (
-                                                            <NavigationMenuLink
-                                                                href={subItem.href}
-                                                                key={subItem.title}
-                                                                className="flex flex-row justify-between items-center hover:bg-muted py-2 px-4 rounded"
-                                                            >
-                                                                <span>{subItem.title}</span>
-                                                                <MoveRight className="w-4 h-4 text-muted-foreground" />
-                                                            </NavigationMenuLink>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </NavigationMenuContent>
-                                        </>
-                                    )}
-                                </NavigationMenuItem>
-                            ))}
-                        </NavigationMenuList>
-                    </NavigationMenu>
-                </div>
-                <div className="flex lg:justify-center">
-                    <p className="font-semibold">TWBlocks</p>
-                </div>
-                <div className="flex justify-end w-full gap-4">
-                    <Button variant="ghost" className="hidden md:inline">
-                        Book a demo
-                    </Button>
-                    <div className="border-r hidden md:inline"></div>
-                    <Button variant="outline">Sign in</Button>
-                    <Button>Get started</Button>
-                </div>
-                <div className="flex w-12 shrink lg:hidden items-end justify-end">
-                    <Button variant="ghost" onClick={() => setOpen(!isOpen)}>
-                        {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                    </Button>
-                    {isOpen && (
-                        <div className="absolute top-20 border-t flex flex-col w-full right-0 bg-background shadow-lg py-4 container gap-8">
-                            {navigationItems.map((item) => (
-                                <div key={item.title}>
-                                    <div className="flex flex-col gap-2">
-                                        {item.href ? (
-                                            <Link
-                                                href={item.href}
-                                                className="flex justify-between items-center"
-                                            >
-                                                <span className="text-lg">{item.title}</span>
-                                                <MoveRight className="w-4 h-4 stroke-1 text-muted-foreground" />
-                                            </Link>
-                                        ) : (
-                                            <p className="text-lg">{item.title}</p>
-                                        )}
-                                        {item.items &&
-                                            item.items.map((subItem) => (
-                                                <Link
-                                                    key={subItem.title}
-                                                    href={subItem.href}
-                                                    className="flex justify-between items-center"
-                                                >
-                                                    <span className="text-muted-foreground">
-                                                        {subItem.title}
-                                                    </span>
-                                                    <MoveRight className="w-4 h-4 stroke-1" />
-                                                </Link>
-                                            ))}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
+export default function Header() {
+  const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
+
+  const navigationItems: NavItem[] = [
+    // Use the NavItem type
+    {
+      title: "ASL Translator",
+      href: "/asl-translator",
+      description: "Translate sign language to text/speech and vice versa",
+    },
+    {
+      title: "Specialized Cabs",
+      href: "/cabs",
+      description:
+        "Book accessible transportation for differently-abled people",
+    },
+    {
+      title: "Care Providers",
+      href: "/care-providers",
+      description: "Find and connect with dedicated care personnel",
+    },
+    {
+      title: "More", // Group less primary links under "More" for cleaner top-level nav
+      href: "#", // Added href for "More" - using '#' as a placeholder as it's a dropdown trigger
+      items: [
+        { title: "Pricing", href: "/pricing" },
+        { title: "FAQ", href: "/faq" },
+        { title: "About Us", href: "/about" },
+        { title: "Contact", href: "/contact" },
+      ],
+    },
+  ];
+
+  return (
+    <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container mx-auto px-4">
+        <nav className="flex h-16 items-center justify-between">
+          <Link href="/" className="flex items-center space-x-2">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+              <FaEye className="w-7 h-7 text-white" />
             </div>
-        </header>
-    );
-}
+            <span className="text-xl font-bold">Eyelink</span>
+          </Link>
 
-export { Header1 };
+          <div className="hidden md:flex md:items-center md:space-x-6">
+            <NavigationMenu>
+              <NavigationMenuList>
+                {navigationItems.map((item) => (
+                  <NavigationMenuItem key={item.title}>
+                    {item.items ? (
+                      <>
+                        <NavigationMenuTrigger>
+                          {item.title}
+                        </NavigationMenuTrigger>
+                        <NavigationMenuContent>
+                          <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2">
+                            {item.items.map((subItem) => (
+                              <li key={subItem.title}>
+                                <NavigationMenuLink asChild>
+                                  <Link
+                                    href={subItem.href}
+                                    className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                                  >
+                                    <div className="text-sm font-medium leading-none">
+                                      {subItem.title}
+                                    </div>
+                                  </Link>
+                                </NavigationMenuLink>
+                              </li>
+                            ))}
+                          </ul>
+                        </NavigationMenuContent>
+                      </>
+                    ) : (
+                      <NavigationMenuItem>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            href={item.href}
+                            className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                          >
+                            {item.title}
+                          </Link>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                    )}
+                  </NavigationMenuItem>
+                ))}
+              </NavigationMenuList>
+            </NavigationMenu>
+
+            <div className="flex items-center space-x-4">
+              <ThemeToggle />
+              <Button
+                variant="ghost"
+                onClick={() => router.push("/auth/sign-in")}
+              >
+                Login
+              </Button>
+              <Button onClick={() => router.push("/asl-translator")}>
+                Try ASL Translator
+                <MoveRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="md:hidden flex items-center space-x-4">
+            <ThemeToggle />
+            <button onClick={() => setIsOpen(!isOpen)}>
+              {isOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </button>
+          </div>
+        </nav>
+
+        {isOpen && (
+          <div className="md:hidden">
+            <div className="space-y-4 px-4 pb-4 pt-2">
+              {navigationItems.map((item) => (
+                <div key={item.title} className="space-y-2">
+                  {item.items ? (
+                    <>
+                      <div className="font-medium">{item.title}</div>
+                      <div className="ml-4 space-y-2">
+                        {item.items.map((subItem) => (
+                          <Link
+                            key={subItem.title}
+                            href={subItem.href}
+                            className="block text-sm text-muted-foreground hover:text-foreground"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            {subItem.title}
+                          </Link>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      className="block font-medium hover:text-foreground"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {item.title}
+                    </Link>
+                  )}
+                </div>
+              ))}
+              <div className="space-y-2 border-t pt-4">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    router.push("/auth/sign-in");
+                    setIsOpen(false);
+                  }}
+                >
+                  Login
+                </Button>
+                <Button
+                  className="w-full justify-start"
+                  onClick={() => {
+                    router.push("/asl-translator");
+                    setIsOpen(false);
+                  }}
+                >
+                  Try ASL Translator
+                  <MoveRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </header>
+  );
+}
