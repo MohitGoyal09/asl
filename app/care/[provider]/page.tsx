@@ -35,7 +35,7 @@ export default async function ProviderPage({
   params,
   searchParams,
 }: PageProps) {
-  const { provider } = await params;
+  const { provider } = params;
 
   const providerData = takerData.find((p) => p.id === provider);
 
