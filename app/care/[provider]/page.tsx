@@ -26,18 +26,16 @@ interface Provider {
   reviews: Review[];
 }
 
-type PageProps = {
-  params: {
-    provider: string;
-  };
+interface PageProps {
+  params: Promise<{ provider: string }>;
   searchParams?: { [key: string]: string | string[] | undefined };
-};
+}
 
 export default async function ProviderPage({
   params,
   searchParams,
 }: PageProps) {
-  const { provider } = params;
+  const { provider } = await params;
 
   const providerData = takerData.find((p) => p.id === provider);
 
