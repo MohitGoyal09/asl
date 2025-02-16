@@ -15,13 +15,14 @@ interface Review {
   text: string;
 }
 
-interface ProviderPageProps {
+interface PageProps {
   params: {
     provider: string;
   };
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
-export default function ProviderPage({ params }: ProviderPageProps) {
+export default function ProviderPage({ params, searchParams }: PageProps) {
   const provider = takerData.find((p) => p.id === params.provider);
 
   if (!provider) {
