@@ -276,7 +276,7 @@ export default function ASLPage() {
                     />
                     {!isVideoEnabled && (
                       <div className="absolute inset-0 flex items-center justify-center backdrop-blur-sm bg-black/5">
-                        <span className="text-muted-foreground font-medium">
+                        <span className="text-muted-foreground font-medium text-sm sm:text-base">
                           Camera is disabled
                         </span>
                       </div>
@@ -284,41 +284,43 @@ export default function ASLPage() {
                   </div>
 
                   {/* Camera Controls */}
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col sm:flex-row items-center gap-4">
                     <Button
                       size="lg"
-                      className="flex-1 h-12 text-base font-medium transition-all"
+                      className="flex-1 h-12 text-base font-medium transition-all w-full sm:w-auto"
                       onClick={
                         isRecording ? handleStopRecording : handleStartRecording
                       }
                       disabled={!isVideoEnabled && !isMicEnabled}
                     >
-                      {isRecording ? "Stop Recording" : "Start Recording"}
+                      {isRecording ? "Stop" : "Start Recording"}
                     </Button>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="h-12 w-12"
-                      onClick={toggleVideo}
-                    >
-                      {isVideoEnabled ? (
-                        <Video className="h-5 w-5" />
-                      ) : (
-                        <VideoOff className="h-5 w-5" />
-                      )}
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="h-12 w-12"
-                      onClick={toggleMicrophone}
-                    >
-                      {isMicEnabled ? (
-                        <Mic className="h-5 w-5" />
-                      ) : (
-                        <MicOff className="h-5 w-5" />
-                      )}
-                    </Button>
+                    <div className="flex gap-4 w-full sm:w-auto">
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-12 w-12 flex-shrink-0"
+                        onClick={toggleVideo}
+                      >
+                        {isVideoEnabled ? (
+                          <Video className="h-5 w-5" />
+                        ) : (
+                          <VideoOff className="h-5 w-5" />
+                        )}
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-12 w-12 flex-shrink-0"
+                        onClick={toggleMicrophone}
+                      >
+                        {isMicEnabled ? (
+                          <Mic className="h-5 w-5" />
+                        ) : (
+                          <MicOff className="h-5 w-5" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </TabsContent>
 
@@ -338,17 +340,17 @@ export default function ASLPage() {
                           controls
                         />
                         <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                          <p className="text-white font-medium">
+                          <p className="text-white font-medium text-sm sm:text-base text-center px-4">
                             Click or drag to replace video
                           </p>
                         </div>
                       </>
                     ) : (
-                      <div className="text-center space-y-4 px-6">
-                        <p className="text-muted-foreground">
+                      <div className="text-center space-y-4 px-4 sm:px-6">
+                        <p className="text-muted-foreground text-sm sm:text-base">
                           Drag and drop a video file or click to upload
                         </p>
-                        <Button variant="outline" className="h-11">
+                        <Button variant="outline" className="h-11 px-4">
                           Choose File
                         </Button>
                         <input

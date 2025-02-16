@@ -1,3 +1,5 @@
+"use client";
+
 import { PulsatingButton } from "@/components/magicui/pulsating-button";
 import { AuroraText } from "@/components/magicui/aurora-text";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
@@ -5,8 +7,11 @@ import { BackgroundLines } from "@/components/ui/background-lines";
 import { ChevronRight } from "lucide-react";
 import { SparklesText } from "@/components/magicui/sparkles-text";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 export function Hero() {
+  const router = useRouter();
+
   return (
     <div className="relative overflow-hidden">
       <BackgroundLines className="min-h-[700px]">
@@ -54,12 +59,16 @@ export function Hero() {
           </p>
 
           <div className="flex flex-wrap gap-6 mt-8 justify-center">
-            <PulsatingButton className="text-lg px-8 py-3 font-medium">
+            <PulsatingButton
+              className="text-lg px-8 py-3 font-medium"
+              onClick={() => router.push("/sign-up")}
+            >
               Get Started Now
             </PulsatingButton>
             <button
               className="group text-lg px-8 py-3 text-muted-foreground border border-border rounded-lg 
               hover:bg-muted/50 transition-all hover:border-border/80 flex items-center gap-2"
+              onClick={() => router.push("/about")}
             >
               Learn More
               <ChevronRight className="size-4 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
