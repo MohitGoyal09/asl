@@ -1,9 +1,9 @@
 import Feature from "@/components/Feature";
-import Footer from "@/components/Footer";
+
 import { Hero } from "@/components/hero";
 import Header from "@/components/ui/header";
 import { Testimonials } from "@/components/Testinomial";
-import Image from "next/image";
+
 import { Pricing } from "@/components/ui/pricing";
 
 export default function Home() {
