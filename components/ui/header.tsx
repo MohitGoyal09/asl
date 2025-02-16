@@ -32,7 +32,7 @@ export default function Header() {
     // Use the NavItem type
     {
       title: "ASL Translator",
-      href: "/asl-translator",
+      href: "/asl",
       description: "Translate sign language to text/speech and vice versa",
     },
     {
@@ -43,7 +43,7 @@ export default function Header() {
     },
     {
       title: "Care Providers",
-      href: "/care-providers",
+      href: "/care",
       description: "Find and connect with dedicated care personnel",
     },
     {
