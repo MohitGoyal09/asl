@@ -15,18 +15,37 @@ interface Review {
   text: string;
 }
 
-interface PageProps {
-  params: {
-    provider: string;
-  };
-  searchParams: { [key: string]: string | string[] | undefined };
+interface Provider {
+  id: string;
+  name: string;
+  profilePicture: string;
+  bio: string;
+  location: string;
+  specializations: string[];
+  languages: string[];
+  availability: string;
+  hourlyRate: number;
+  reviews: Review[];
 }
 
-export default function ProviderPage({ params, searchParams }: PageProps) {
-  const provider = takerData.find((p) => p.id === params.provider);
+type Props = {
+  params: { provider: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+};
+
+export default function ProviderPage({ params, searchParams }: Props) {
+  const [provider, setProvider] = React.useState<Provider | null>(null);
+
+  React.useEffect(() => {
+    const foundProvider = takerData.find((p) => p.id === params.provider);
+    if (!foundProvider) {
+      notFound();
+    }
+    setProvider(foundProvider as Provider);
+  }, [params.provider]);
 
   if (!provider) {
-    notFound();
+    return null;
   }
 
   return (
