@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
+import { toast } from "sonner";
 import {
   Popover,
   PopoverContent,
@@ -35,7 +36,24 @@ export default function CabBookingPage() {
   const [routeInfo, setRouteInfo] = useState<{
     distance: number;
     duration: number;
-  }>({ distance: 0, duration: 0 });
+    fare: {
+      baseFare: number;
+      distanceFare: number;
+      timeFare: number;
+      totalFare: number;
+      nightCharge?: number;
+      surgeCharge?: number;
+    };
+  }>({
+    distance: 0,
+    duration: 0,
+    fare: {
+      baseFare: 0,
+      distanceFare: 0,
+      timeFare: 0,
+      totalFare: 0,
+    },
+  });
   const [bookingData, setBookingData] = useState({
     pickup: "",
     destination: "",
@@ -90,6 +108,31 @@ export default function CabBookingPage() {
     }));
   };
 
+  const handleRouteUpdate = (info: { distance: number; duration: number }) => {
+    const baseFare = 200;
+    const perKmRate = 15;
+    const perMinuteRate = 2;
+    const distanceFare = Math.round(info.distance * perKmRate);
+    const timeFare = Math.round(info.duration * perMinuteRate);
+    const accessibilitySurcharge = Object.values(bookingData.requirements).some(
+      (v) => v
+    )
+      ? 50
+      : 0;
+
+    setRouteInfo({
+      ...info,
+      fare: {
+        baseFare,
+        distanceFare,
+        timeFare,
+        totalFare: baseFare + distanceFare + timeFare + accessibilitySurcharge,
+        nightCharge: undefined,
+        surgeCharge: undefined,
+      },
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -102,21 +145,21 @@ export default function CabBookingPage() {
       !bookingData.phone ||
       !bookingData.email
     ) {
-      alert("Please fill in all required fields");
+      toast.error("Please fill in all required fields");
       return;
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(bookingData.email)) {
-      alert("Please enter a valid email address");
+      toast.error("Please enter a valid email address");
       return;
     }
 
     // Validate phone number (basic validation for Indian numbers)
     const phoneRegex = /^[6-9]\d{9}$/;
     if (!phoneRegex.test(bookingData.phone)) {
-      alert("Please enter a valid 10-digit phone number");
+      toast.error("Please enter a valid 10-digit phone number");
       return;
     }
 
@@ -125,30 +168,34 @@ export default function CabBookingPage() {
       const bookingPayload = {
         ...bookingData,
         date: date?.toISOString(),
-        estimatedFare: calculateFare(),
+        estimatedFare: routeInfo.fare.totalFare,
         routeInfo,
       };
 
       // For now, we'll just log the booking data
       console.log("Booking submitted:", bookingPayload);
-      alert("Booking submitted successfully! We'll contact you shortly.");
+      toast.success(
+        "Booking submitted successfully! We'll contact you shortly.",
+        {
+          description: `Your estimated fare is ₹${routeInfo.fare.totalFare}`,
+          action: {
+            label: "View Details",
+            onClick: () => console.log("View booking details"),
+          },
+        }
+      );
     } catch (error) {
       console.error("Error submitting booking:", error);
-      alert("There was an error submitting your booking. Please try again.");
+      toast.error(
+        "There was an error submitting your booking. Please try again.",
+        {
+          action: {
+            label: "Try Again",
+            onClick: () => handleSubmit(e),
+          },
+        }
+      );
     }
-  };
-
-  // Calculate fare based on distance and requirements
-  const calculateFare = () => {
-    const baseFare = 200; // Base fare in INR
-    const perKmRate = 15; // Rate per kilometer in INR
-    const accessibilitySurcharge = Object.values(bookingData.requirements).some(
-      (value) => value
-    )
-      ? 50
-      : 0;
-    const distanceFare = routeInfo.distance * perKmRate;
-    return Math.ceil(baseFare + distanceFare + accessibilitySurcharge);
   };
 
   return (
@@ -420,7 +467,7 @@ export default function CabBookingPage() {
                         }
                       : undefined
                   }
-                  onRouteUpdate={setRouteInfo}
+                  onRouteUpdate={handleRouteUpdate}
                 />
               </div>
               {selectedLocation && (
@@ -436,36 +483,88 @@ export default function CabBookingPage() {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Base Fare</span>
-                  <span className="font-medium">₹200</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Distance (est.)</span>
                   <span className="font-medium">
-                    {routeInfo.distance.toFixed(1)} km
+                    ₹{routeInfo.fare.baseFare}
                   </span>
                 </div>
+
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Time (est.)</span>
-                  <span className="font-medium">{routeInfo.duration} mins</span>
+                  <span className="text-muted-foreground">
+                    Distance Charge ({routeInfo.distance.toFixed(1)} km)
+                  </span>
+                  <span className="font-medium">
+                    ₹{Math.round(routeInfo.fare.distanceFare)}
+                  </span>
                 </div>
+
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">
+                    Time Charge ({routeInfo.duration} mins)
+                  </span>
+                  <span className="font-medium">
+                    ₹{Math.round(routeInfo.fare.timeFare)}
+                  </span>
+                </div>
+
+                {routeInfo.fare.nightCharge && (
+                  <div className="flex justify-between text-purple-600">
+                    <span>Night Charge (1.25x)</span>
+                    <span className="font-medium">
+                      ₹{Math.round(routeInfo.fare.nightCharge)}
+                    </span>
+                  </div>
+                )}
+
+                {routeInfo.fare.surgeCharge && (
+                  <div className="flex justify-between text-orange-600">
+                    <span>Surge Charge (1.2x)</span>
+                    <span className="font-medium">
+                      ₹{Math.round(routeInfo.fare.surgeCharge)}
+                    </span>
+                  </div>
+                )}
+
                 {Object.entries(bookingData.requirements).some(
                   ([_, value]) => value
                 ) && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      Accessibility Surcharge
-                    </span>
+                  <div className="flex justify-between text-blue-600">
+                    <span>Accessibility Surcharge</span>
                     <span className="font-medium">₹50</span>
                   </div>
                 )}
+
                 <div className="pt-2 mt-2 border-t">
                   <div className="flex justify-between">
                     <span className="font-semibold">Total Estimate</span>
-                    <span className="font-semibold">₹{calculateFare()}</span>
+                    <span className="font-semibold">
+                      ₹{routeInfo.fare.totalFare}
+                    </span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Final fare may vary based on actual route and waiting time
-                  </p>
+                  <div className="mt-2 space-y-1">
+                    <p className="text-xs text-muted-foreground">
+                      Base rate: ₹50 + ₹12/km + ₹2/min
+                    </p>
+                    {(new Date().getHours() >= 22 ||
+                      new Date().getHours() < 5) && (
+                      <p className="text-xs text-purple-600">
+                        Night charges (10 PM - 5 AM): 1.25x
+                      </p>
+                    )}
+                    {((new Date().getHours() >= 8 &&
+                      new Date().getHours() <= 10) ||
+                      (new Date().getHours() >= 17 &&
+                        new Date().getHours() <= 20)) && (
+                      <p className="text-xs text-orange-600">
+                        Surge pricing (8-10 AM, 5-8 PM): 1.2x
+                      </p>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Minimum fare: ₹100
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Final fare may vary based on actual route and waiting time
+                    </p>
+                  </div>
                 </div>
               </div>
             </Card>
