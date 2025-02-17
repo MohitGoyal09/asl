@@ -263,6 +263,7 @@ export default function ProviderPage({ params, searchParams }: PageProps) {
                 )}
               </div>
             </Card>
+            
           </div>
 
           {/* Right Column - Booking Card */}
