@@ -15,13 +15,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, MapPin, Clock, Languages } from "lucide-react";
-import {
-  ProviderCard,
-  NoProvidersFound,
-  Provider,
-} from "@/components/ui/provider-card";
+import { Search, MapPin, Clock, Languages, Star, Award } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import takerData from "@/data/taker.json";
+
+interface Review {
+  author: string;
+  rating: number;
+  text: string;
+}
+
+interface Provider {
+  id: string;
+  name: string;
+  profilePicture: string;
+  bio: string;
+  location: string;
+  specializations: string[];
+  languages: string[];
+  availability: string;
+  hourlyRate: number;
+  reviews: Review[];
+}
 
 const specializations = [
   { id: "asl", label: "ASL Communication" },
@@ -46,17 +63,15 @@ const availability = [
   { value: "flexible", label: "Flexible" },
 ];
 
-export default function CarePage() {
+interface PageProps {
+  searchParams: { [key: string]: string | string[] | undefined };
+}
+
+export default function CarePage({ searchParams }: PageProps) {
   const [providers, setProviders] = React.useState<Provider[]>(
-    takerData.map((taker) => ({
-      id: taker.id,
-      name: taker.name,
-      image: taker.profilePicture,
-      tagline: taker.bio,
-      specializations: taker.specializations,
-      location: taker.location,
-    }))
+    takerData as Provider[]
   );
+  const [bookingDetails, setBookingDetails] = React.useState<any>(null);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedLocation, setSelectedLocation] = React.useState("");
   const [selectedAvailability, setSelectedAvailability] = React.useState("");
@@ -66,46 +81,92 @@ export default function CarePage() {
     string[]
   >([]);
 
+  React.useEffect(() => {
+    // Get booking details from URL params and localStorage
+    const storedBooking = localStorage.getItem("bookingData");
+    const bookingData = storedBooking ? JSON.parse(storedBooking) : null;
+
+    if (bookingData || Object.keys(searchParams).length > 0) {
+      setBookingDetails({
+        ...bookingData,
+        pickup: searchParams.pickup || bookingData?.pickup,
+        destination: searchParams.destination || bookingData?.destination,
+        date: searchParams.date || bookingData?.date,
+        requirements: searchParams.requirements
+          ? JSON.parse(searchParams.requirements as string)
+          : bookingData?.requirements,
+      });
+
+      // Filter providers based on requirements
+      const requirements = searchParams.requirements
+        ? JSON.parse(searchParams.requirements as string)
+        : bookingData?.requirements;
+
+      if (requirements) {
+        const filteredProviders = takerData.filter((provider) => {
+          // Add your filtering logic here based on requirements
+          // This is a simple example - enhance based on your needs
+          return provider.specializations.some((spec) =>
+            requirements.boarding
+              ? spec.includes("Mobility")
+              : true && requirements.extraSpace
+              ? spec.includes("Special")
+              : true && requirements.serviceAnimal
+              ? spec.includes("Animal")
+              : true
+          );
+        });
+        setProviders(filteredProviders);
+      }
+    }
+  }, [searchParams]);
+
   const handleSearch = () => {
-    let filtered = takerData.map((taker) => ({
-      id: taker.id,
-      name: taker.name,
-      image: taker.profilePicture,
-      tagline: taker.bio,
-      specializations: taker.specializations,
-      location: taker.location,
-    }));
+    // Filter providers based on search criteria
+    const filteredProviders = (takerData as Provider[]).filter((provider) => {
+      const matchesSearch =
+        searchQuery === "" ||
+        provider.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        provider.specializations.some((s) =>
+          s.toLowerCase().includes(searchQuery.toLowerCase())
+        );
 
-    // Search query filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (provider) =>
-          provider.name.toLowerCase().includes(query) ||
-          provider.tagline.toLowerCase().includes(query) ||
-          provider.specializations.some((spec) =>
-            spec.toLowerCase().includes(query)
-          )
+      const matchesLocation =
+        selectedLocation === "" ||
+        provider.location.toLowerCase() === selectedLocation.toLowerCase();
+
+      const matchesAvailability =
+        selectedAvailability === "" ||
+        provider.availability.toLowerCase() ===
+          selectedAvailability.toLowerCase();
+
+      const matchesLanguage =
+        selectedLanguage === "" ||
+        provider.languages.some(
+          (l) => l.toLowerCase() === selectedLanguage.toLowerCase()
+        );
+
+      const matchesPriceRange =
+        selectedPriceRange === "" ||
+        matchesPriceRangeFilter(provider.hourlyRate, selectedPriceRange);
+
+      const matchesSpecializations =
+        selectedSpecializations.length === 0 ||
+        selectedSpecializations.every((s) =>
+          provider.specializations.includes(s)
+        );
+
+      return (
+        matchesSearch &&
+        matchesLocation &&
+        matchesAvailability &&
+        matchesLanguage &&
+        matchesPriceRange &&
+        matchesSpecializations
       );
-    }
+    });
 
-    // Location filter
-    if (selectedLocation) {
-      filtered = filtered.filter((provider) =>
-        provider.location.toLowerCase().includes(selectedLocation.toLowerCase())
-      );
-    }
-
-    // Specializations filter
-    if (selectedSpecializations.length > 0) {
-      filtered = filtered.filter((provider) =>
-        selectedSpecializations.every((spec) =>
-          provider.specializations.includes(spec)
-        )
-      );
-    }
-
-    setProviders(filtered);
+    setProviders(filteredProviders);
   };
 
   const clearFilters = () => {
@@ -115,16 +176,14 @@ export default function CarePage() {
     setSelectedLanguage("");
     setSelectedPriceRange("");
     setSelectedSpecializations([]);
-    setProviders(
-      takerData.map((taker) => ({
-        id: taker.id,
-        name: taker.name,
-        image: taker.profilePicture,
-        tagline: taker.bio,
-        specializations: taker.specializations,
-        location: taker.location,
-      }))
-    );
+    setProviders(takerData as Provider[]);
+  };
+
+  // Helper function to match price range
+  const matchesPriceRangeFilter = (rate: number, range: string) => {
+    const [min, max] = range.split("-").map(Number);
+    if (range === "75+") return rate >= 75;
+    return rate >= min && rate <= max;
   };
 
   React.useEffect(() => {
@@ -132,184 +191,123 @@ export default function CarePage() {
   }, [searchQuery, selectedLocation, selectedSpecializations]);
 
   return (
-    <div className="container mx-auto px-4 py-24 space-y-12">
-      {/* Page Title */}
-      <div className="text-center space-y-6">
-        <SparklesText
-          className="text-4xl font-bold tracking-tight sm:text-5xl"
-          text="Connect with Dedicated Caregivers"
-        />
-
-        <AuroraText className="max-w-3xl mx-auto text-lg sm:text-xl text-muted-foreground">
-          Eyelink connects you with a network of compassionate and skilled care
-          providers dedicated to supporting differently-abled individuals.
-          Browse our profiles to find the right caregiver to meet your unique
-          needs and preferences.
-        </AuroraText>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 pt-24">
+      {/* Page Header */}
+      <div className="relative text-center mb-16 container max-w-7xl mx-auto px-6">
+        <div className="space-y-12">
+          <SparklesText
+            className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
+            text={
+              bookingDetails ? "Recommended Assistants" : "Our Care Assistants"
+            }
+          />
+          {bookingDetails && (
+            <div className="flex flex-wrap gap-4 justify-center items-center">
+              <Badge variant="secondary" className="px-4 py-2 text-base">
+                <MapPin className="w-4 h-4 mr-2" />
+                {bookingDetails.pickup} → {bookingDetails.destination}
+              </Badge>
+              <Badge variant="secondary" className="px-4 py-2 text-base">
+                <Clock className="w-4 h-4 mr-2" />
+                {new Date(bookingDetails.date).toLocaleDateString()}
+              </Badge>
+            </div>
+          )}
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
+            {bookingDetails
+              ? "Based on your requirements, we've found these qualified assistants for your journey."
+              : "Our experienced and verified care assistants are here to help you with your needs."}
+          </p>
+        </div>
       </div>
 
-      {/* Search and Filter Section */}
-      <Card className="p-6">
-        <div className="space-y-6">
-          {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by skills, languages, or provider name..."
-              className="pl-10"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+      {/* Providers Grid */}
+      <div className="container max-w-7xl mx-auto px-6 pb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {providers.map((provider) => {
+            const averageRating =
+              provider.reviews.reduce((acc, review) => acc + review.rating, 0) /
+              provider.reviews.length;
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Location Filter */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                Location
-              </Label>
-              <Select
-                value={selectedLocation}
-                onValueChange={setSelectedLocation}
+            return (
+              <Link
+                key={provider.id}
+                href={`/care/${provider.id}`}
+                className="transition-transform hover:scale-[1.02]"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select area" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="new york">New York</SelectItem>
-                  <SelectItem value="los angeles">Los Angeles</SelectItem>
-                  <SelectItem value="chicago">Chicago</SelectItem>
-                  <SelectItem value="san francisco">San Francisco</SelectItem>
-                  <SelectItem value="seattle">Seattle</SelectItem>
-                  <SelectItem value="austin">Austin</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+                <Card className="p-6 h-full flex flex-col">
+                  <div className="flex items-start gap-4 mb-4">
+                    <Avatar className="h-16 w-16">
+                      <AvatarImage
+                        src={provider.profilePicture}
+                        alt={provider.name}
+                      />
+                      <AvatarFallback>
+                        {provider.name.slice(0, 2)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold">{provider.name}</h3>
+                      <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                        <MapPin className="h-4 w-4" />
+                        <span>{provider.location}</span>
+                      </div>
+                      <div className="flex items-center gap-1 mt-1">
+                        <Star className="h-4 w-4 fill-primary text-primary" />
+                        <span className="font-medium">
+                          {averageRating.toFixed(1)}
+                        </span>
+                        <span className="text-muted-foreground">
+                          ({provider.reviews.length})
+                        </span>
+                      </div>
+                    </div>
+                  </div>
 
-            {/* Availability Filter */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                Availability
-              </Label>
-              <Select
-                value={selectedAvailability}
-                onValueChange={setSelectedAvailability}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select time" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availability.map((time) => (
-                    <SelectItem key={time.value} value={time.value}>
-                      {time.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                  <p className="text-muted-foreground mb-4 line-clamp-2">
+                    {provider.bio}
+                  </p>
 
-            {/* Languages Filter */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <Languages className="h-4 w-4" />
-                Languages
-              </Label>
-              <Select
-                value={selectedLanguage}
-                onValueChange={setSelectedLanguage}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select language" />
-                </SelectTrigger>
-                <SelectContent>
-                  {languages.map((lang) => (
-                    <SelectItem key={lang.value} value={lang.value}>
-                      {lang.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                  <div className="mt-auto">
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {provider.specializations.slice(0, 3).map((spec) => (
+                        <Badge
+                          key={spec}
+                          variant="secondary"
+                          className="px-2 py-1 text-xs"
+                        >
+                          {spec}
+                        </Badge>
+                      ))}
+                      {provider.specializations.length > 3 && (
+                        <Badge
+                          variant="secondary"
+                          className="px-2 py-1 text-xs"
+                        >
+                          +{provider.specializations.length - 3} more
+                        </Badge>
+                      )}
+                    </div>
 
-            {/* Price Range Filter */}
-            <div className="space-y-2">
-              <Label>Price Range</Label>
-              <Select
-                value={selectedPriceRange}
-                onValueChange={setSelectedPriceRange}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select range" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0-25">$0 - $25/hr</SelectItem>
-                  <SelectItem value="25-50">$25 - $50/hr</SelectItem>
-                  <SelectItem value="50-75">$50 - $75/hr</SelectItem>
-                  <SelectItem value="75+">$75+/hr</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Specializations */}
-          <div className="space-y-3">
-            <Label>Specializations</Label>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {specializations.map((spec) => (
-                <div key={spec.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={spec.id}
-                    checked={selectedSpecializations.includes(spec.label)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setSelectedSpecializations([
-                          ...selectedSpecializations,
-                          spec.label,
-                        ]);
-                      } else {
-                        setSelectedSpecializations(
-                          selectedSpecializations.filter(
-                            (s) => s !== spec.label
-                          )
-                        );
-                      }
-                    }}
-                  />
-                  <label
-                    htmlFor={spec.id}
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    {spec.label}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-4">
-            <Button variant="outline" onClick={clearFilters}>
-              Clear Filters
-            </Button>
-            <Button onClick={handleSearch}>Apply Filters</Button>
-          </div>
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline" className="px-3 py-1">
+                        <Clock className="w-4 h-4 mr-1" />
+                        {provider.availability}
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className="px-3 py-1 bg-primary/5"
+                      >
+                        <Award className="w-4 h-4 mr-1" />${provider.hourlyRate}
+                        /hr
+                      </Badge>
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            );
+          })}
         </div>
-      </Card>
-
-      {/* Provider Listings */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-semibold">Available Care Providers</h2>
-        {providers.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {providers.map((provider) => (
-              <ProviderCard key={provider.id} provider={provider} />
-            ))}
-          </div>
-        ) : (
-          <NoProvidersFound />
-        )}
       </div>
     </div>
   );

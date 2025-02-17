@@ -24,8 +24,10 @@ import { format } from "date-fns";
 import { Calendar as CalendarIcon, MapPin, Clock } from "lucide-react";
 import { SparklesText } from "@/components/magicui/sparkles-text";
 import { OpenStreetMap } from "@/components/ui/openstreet-map";
+import { useRouter } from "next/navigation";
 
 export default function CabBookingPage() {
+  const router = useRouter();
   const [date, setDate] = useState<Date>();
   const [selectedLocation, setSelectedLocation] = useState<{
     type: "pickup" | "destination";
@@ -164,7 +166,7 @@ export default function CabBookingPage() {
     }
 
     try {
-      // Here you would typically make an API call to your backend
+      // Create booking payload
       const bookingPayload = {
         ...bookingData,
         date: date?.toISOString(),
@@ -172,22 +174,24 @@ export default function CabBookingPage() {
         routeInfo,
       };
 
-      // For now, we'll just log the booking data
-      console.log("Booking submitted:", bookingPayload);
-      toast.success(
-        "Booking submitted successfully! We'll contact you shortly.",
-        {
-          description: `Your estimated fare is ₹${routeInfo.fare.totalFare}`,
-          action: {
-            label: "View Details",
-            onClick: () => console.log("View booking details"),
-          },
-        }
-      );
+      // Store booking data in localStorage for persistence
+      localStorage.setItem("bookingData", JSON.stringify(bookingPayload));
+
+      // Redirect to care page with relevant query parameters
+      const queryParams = new URLSearchParams({
+        pickup: bookingData.pickup,
+        destination: bookingData.destination,
+        date: date?.toISOString() || "",
+        requirements: JSON.stringify(bookingData.requirements),
+      }).toString();
+
+      router.push(`/care?${queryParams}`);
+
+      toast.success("Redirecting you to available care assistants...");
     } catch (error) {
-      console.error("Error submitting booking:", error);
+      console.error("Error processing booking:", error);
       toast.error(
-        "There was an error submitting your booking. Please try again.",
+        "There was an error processing your request. Please try again.",
         {
           action: {
             label: "Try Again",
