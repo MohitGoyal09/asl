@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import type { Map, LatLng, Marker, Control, DivIcon, TileLayer } from "leaflet";
 
 interface Location {
   lat: number;
@@ -33,15 +32,16 @@ export default function MapComponent({
   destination,
   onRouteUpdate,
 }: MapComponentProps) {
-  const mapRef = useRef<Map | null>(null);
-  const routingControlRef = useRef<any | null>(null);
-  const markersRef = useRef<{
-    pickup?: Marker;
-    destination?: Marker;
-    current?: Marker;
-  }>({});
-  const leafletRef = useRef<typeof import("leaflet") | null>(null);
-  const [userLocation, setUserLocation] = useState<LatLng | null>(null);
+  const mapRef = useRef<any>(null);
+  const routingControlRef = useRef<any>(null);
+  const markersRef = useRef<{ pickup?: any; destination?: any; current?: any }>(
+    {}
+  );
+  const leafletRef = useRef<any>(null);
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectionMode, setSelectionMode] = useState<
     "pickup" | "destination" | null
@@ -52,29 +52,21 @@ export default function MapComponent({
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          if (leafletRef.current) {
-            const L = leafletRef.current;
-            setUserLocation(
-              L.latLng(position.coords.latitude, position.coords.longitude)
-            );
-          }
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
         },
         (error) => {
           console.error("Error getting location:", error);
           // Default to Mumbai, India if location access is denied
-          if (leafletRef.current) {
-            const L = leafletRef.current;
-            setUserLocation(L.latLng(19.076, 72.8777));
-          }
+          setUserLocation({ lat: 19.076, lng: 72.8777 });
         },
         { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
       );
     } else {
       // Default to Mumbai, India if geolocation is not supported
-      if (leafletRef.current) {
-        const L = leafletRef.current;
-        setUserLocation(L.latLng(19.076, 72.8777));
-      }
+      setUserLocation({ lat: 19.076, lng: 72.8777 });
     }
   }, []);
 
@@ -112,13 +104,13 @@ export default function MapComponent({
           shadowUrl: "/leaflet/marker-shadow.png",
         });
 
-        // Add current location marker with proper typing
+        // Add current location marker
         const currentLocationIcon = L.divIcon({
           html: '<div class="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg pulse-animation"></div>',
           className: "current-location-marker",
         });
 
-        if (isSubscribed && mapRef.current) {
+        if (isSubscribed) {
           markersRef.current.current = L.marker(
             [userLocation.lat, userLocation.lng],
             {
@@ -134,9 +126,9 @@ export default function MapComponent({
             "leaflet-routing-machine/dist/leaflet-routing-machine.css"
           );
 
-          // Add location selection controls with proper typing
+          // Add location selection controls
           const SelectionControl = L.Control.extend({
-            onAdd: function (map: Map) {
+            onAdd: function (map: any) {
               const container = L.DomUtil.create(
                 "div",
                 "leaflet-bar leaflet-control selection-control"
@@ -183,15 +175,13 @@ export default function MapComponent({
             },
           });
 
-          if (mapRef.current) {
-            mapRef.current.addControl(
-              new SelectionControl({ position: "topleft" })
-            );
-          }
+          mapRef.current.addControl(
+            new SelectionControl({ position: "topleft" })
+          );
 
-          // Add search control with proper typing
+          // Add search control with modified behavior
           const searchControl = L.Control.extend({
-            onAdd: function (map: Map) {
+            onAdd: function (map: any) {
               const container = L.DomUtil.create(
                 "div",
                 "leaflet-bar leaflet-control"
@@ -244,37 +234,32 @@ export default function MapComponent({
             },
           });
 
-          if (mapRef.current) {
-            mapRef.current.addControl(
-              new searchControl({ position: "topleft" })
-            );
-          }
+          mapRef.current.addControl(new searchControl({ position: "topleft" }));
 
-          // Modify click handler for location selection with proper typing
-          if (mapRef.current) {
-            mapRef.current.on("click", async (e: L.LeafletMouseEvent) => {
-              if (!selectionMode) {
-                return;
-              }
+          // Modify click handler for location selection
+          mapRef.current.on("click", async (e: any) => {
+            if (!selectionMode) {
+              // Show a tooltip or alert to select mode first
+              return;
+            }
 
-              const { lat, lng } = e.latlng;
-              try {
-                const response = await fetch(
-                  `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
-                );
-                const data = await response.json();
-                const location = {
-                  lat,
-                  lng,
-                  address: data.display_name,
-                };
-                onLocationSelect(location);
-                setSelectionMode(null);
-              } catch (error) {
-                console.error("Error getting address:", error);
-              }
-            });
-          }
+            const { lat, lng } = e.latlng;
+            try {
+              const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+              );
+              const data = await response.json();
+              const location = {
+                lat,
+                lng,
+                address: data.display_name,
+              };
+              onLocationSelect(location);
+              setSelectionMode(null); // Reset selection mode after selecting
+            } catch (error) {
+              console.error("Error getting address:", error);
+            }
+          });
         }
       } catch (error) {
         console.error("Error initializing map:", error);
@@ -355,11 +340,13 @@ export default function MapComponent({
     const L = leafletRef.current;
 
     // Clear existing markers (except current location)
-    Object.entries(markersRef.current).forEach(([key, marker]) => {
-      if (key !== "current" && marker) {
-        marker.remove();
+    Object.entries(markersRef.current).forEach(
+      ([key, marker]: [string, any]) => {
+        if (key !== "current" && marker) {
+          marker.remove();
+        }
       }
-    });
+    );
 
     // Clear existing route
     if (routingControlRef.current) {
@@ -377,7 +364,7 @@ export default function MapComponent({
       className: "destination-marker",
     });
 
-    if (pickup && mapRef.current) {
+    if (pickup) {
       markersRef.current.pickup = L.marker([pickup.lat, pickup.lng], {
         icon: pickupIcon,
       })
@@ -385,7 +372,7 @@ export default function MapComponent({
         .bindPopup("Pickup Location");
     }
 
-    if (destination && mapRef.current) {
+    if (destination) {
       markersRef.current.destination = L.marker(
         [destination.lat, destination.lng],
         { icon: destinationIcon }
@@ -395,7 +382,7 @@ export default function MapComponent({
     }
 
     // Add routing if both points exist
-    if (pickup && destination && mapRef.current) {
+    if (pickup && destination) {
       const control = L.Routing.control({
         waypoints: [
           L.latLng(pickup.lat, pickup.lng),
@@ -428,13 +415,11 @@ export default function MapComponent({
         });
 
         // Fit the map to show the entire route with padding
-        if (mapRef.current) {
-          const bounds = L.latLngBounds([
-            [pickup.lat, pickup.lng],
-            [destination.lat, destination.lng],
-          ]);
-          mapRef.current.fitBounds(bounds, { padding: [50, 50] });
-        }
+        const bounds = L.latLngBounds([
+          [pickup.lat, pickup.lng],
+          [destination.lat, destination.lng],
+        ]);
+        mapRef.current.fitBounds(bounds, { padding: [50, 50] });
       });
     }
   }, [pickup, destination]);
@@ -477,10 +462,10 @@ export default function MapComponent({
         id="map"
         className="w-full h-full min-h-[400px] rounded-lg overflow-hidden"
       />
-      {userLocation && mapRef.current && (
+      {userLocation && (
         <button
           onClick={() => {
-            if (mapRef.current && userLocation) {
+            if (mapRef.current) {
               mapRef.current.setView([userLocation.lat, userLocation.lng], 13);
             }
           }}
