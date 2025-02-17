@@ -36,7 +36,7 @@ export default function Header() {
       description: "Translate sign language to text/speech and vice versa",
     },
     {
-      title: "Specialized Cabs",
+      title: "Travel Assistant",
       href: "/cabs",
       description:
         "Book accessible transportation for differently-abled people",
@@ -119,11 +119,11 @@ export default function Header() {
               <ThemeToggle />
               <Button
                 variant="ghost"
-                onClick={() => router.push("/auth/sign-in")}
+                onClick={() => router.push("/sign-in")}
               >
                 Login
               </Button>
-              <Button onClick={() => router.push("/asl-translator")}>
+              <Button onClick={() => router.push("/asl")}>
                 Try ASL Translator
                 <MoveRight className="ml-2 h-4 w-4" />
               </Button>

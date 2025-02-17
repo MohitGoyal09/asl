@@ -13,7 +13,7 @@ export default async function Signup(props: {
   const searchParams = await props.searchParams;
   if ("message" in searchParams) {
     return (
-      <div className="w-full flex-1 flex items-center justify-center p-4">
+      <div className="w-full flex-1 flex items-center justify-center p-4 py-">
         <div className="w-full max-w-md">
           <FormMessage message={searchParams} />
         </div>
@@ -22,7 +22,7 @@ export default async function Signup(props: {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto space-y-8 p-4">
+    <div className="w-full max-w-md mx-auto space-y-10 p-4">
       <div className="flex flex-col items-center space-y-2">
         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
           <FaEye className="w-6 h-6 text-white" />

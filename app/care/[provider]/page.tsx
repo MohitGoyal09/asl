@@ -104,15 +104,15 @@ export default function ProviderPage({ params, searchParams }: PageProps) {
     provider.reviews.length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 pt-24">
       {/* Hero Section */}
-      <div className="relative bg-primary/5 py-12 overflow-hidden">
+      <div className="relative bg-primary/5 py-12 overflow-hidden mb-8">
         <div className="absolute inset-0 bg-grid-white/10" />
         <div className="container mx-auto px-4">
           <div className="relative bg-background/60 backdrop-blur-lg rounded-2xl p-8 shadow-lg">
             <div className="flex flex-col md:flex-row gap-8 items-start">
               {/* Profile Picture Section */}
-          <div className="flex-shrink-0">
+              <div className="flex-shrink-0">
                 <div className="relative">
                   <Avatar className="h-40 w-40 ring-4 ring-primary/10">
                     <AvatarImage
@@ -123,14 +123,14 @@ export default function ProviderPage({ params, searchParams }: PageProps) {
                     <AvatarFallback className="text-2xl">
                       {provider.name.slice(0, 2)}
                     </AvatarFallback>
-            </Avatar>
+                  </Avatar>
                   <Badge className="absolute -bottom-2 right-0 px-4 py-1">
                     <Shield className="w-4 h-4 mr-1" /> Verified
                   </Badge>
                 </div>
-          </div>
+              </div>
 
-          {/* Provider Info */}
+              {/* Provider Info */}
               <div className="flex-grow space-y-6">
                 <div className="flex flex-col md:flex-row justify-between gap-4">
                   <div className="space-y-2">
@@ -139,8 +139,8 @@ export default function ProviderPage({ params, searchParams }: PageProps) {
                     </h1>
                     <div className="flex items-center gap-4 text-muted-foreground">
                       <div className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4" />
-                  <span>{provider.location}</span>
+                        <MapPin className="h-4 w-4" />
+                        <span>{provider.location}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Star className="h-4 w-4 fill-primary text-primary" />
@@ -149,19 +149,19 @@ export default function ProviderPage({ params, searchParams }: PageProps) {
                           reviews)
                         </span>
                       </div>
-                </div>
-              </div>
-              <div className="flex gap-3">
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
                     <Button size="lg" className="shadow-lg">
                       <Mail className="mr-2 h-5 w-5" />
                       Contact Now
-                </Button>
+                    </Button>
                     <Button size="lg" variant="outline">
                       <Calendar className="mr-2 h-5 w-5" />
-                  Schedule Call
-                </Button>
-              </div>
-            </div>
+                      Schedule Call
+                    </Button>
+                  </div>
+                </div>
 
                 <div className="prose prose-sm max-w-none">
                   <p className="text-lg text-muted-foreground leading-relaxed">
@@ -196,7 +196,7 @@ export default function ProviderPage({ params, searchParams }: PageProps) {
       </div>
 
       {/* Content Section */}
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Left Column */}
           <div className="md:col-span-2 space-y-8">
@@ -215,26 +215,26 @@ export default function ProviderPage({ params, searchParams }: PageProps) {
                     {spec}
                   </Badge>
                 ))}
-        </div>
-      </Card>
+              </div>
+            </Card>
 
             {/* Reviews */}
-        <Card className="p-6">
+            <Card className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-semibold">Client Reviews</h2>
                 <Badge variant="secondary" className="px-3 py-1">
-                {provider.reviews.length} Reviews
-              </Badge>
-            </div>
+                  {provider.reviews.length} Reviews
+                </Badge>
+              </div>
 
               <div className="space-y-6">
-              {provider.reviews.length > 0 ? (
+                {provider.reviews.length > 0 ? (
                   provider.reviews.map((review, index) => (
-                  <div
-                    key={index}
+                    <div
+                      key={index}
                       className="bg-muted/50 rounded-lg p-4 transition-colors hover:bg-muted/70"
-                  >
-                    <div className="flex justify-between items-start mb-2">
+                    >
+                      <div className="flex justify-between items-start mb-2">
                         <div className="flex items-center gap-2">
                           <Avatar className="h-8 w-8">
                             <AvatarFallback>
@@ -243,19 +243,19 @@ export default function ProviderPage({ params, searchParams }: PageProps) {
                           </Avatar>
                           <span className="font-medium">{review.author}</span>
                         </div>
-                      <div className="flex items-center">
-                        {Array.from({ length: review.rating }).map((_, i) => (
-                          <Star
-                            key={i}
-                            className="h-4 w-4 fill-primary text-primary"
-                          />
-                        ))}
+                        <div className="flex items-center">
+                          {Array.from({ length: review.rating }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className="h-4 w-4 fill-primary text-primary"
+                            />
+                          ))}
+                        </div>
                       </div>
+                      <p className="text-muted-foreground">{review.text}</p>
                     </div>
-                    <p className="text-muted-foreground">{review.text}</p>
-                  </div>
-                ))
-              ) : (
+                  ))
+                ) : (
                   <div className="text-center py-8 text-muted-foreground">
                     <Heart className="h-12 w-12 mx-auto mb-3 opacity-20" />
                     <p>No reviews yet. Be the first to review!</p>
@@ -290,7 +290,7 @@ export default function ProviderPage({ params, searchParams }: PageProps) {
                 <p className="text-xs text-muted-foreground text-center mt-2">
                   Free cancellation up to 24 hours before the session
                 </p>
-            </div>
+              </div>
             </Card>
           </div>
         </div>

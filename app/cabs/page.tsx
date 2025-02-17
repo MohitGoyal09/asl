@@ -205,7 +205,7 @@ export default function CabBookingPage() {
         <div className="space-y-12">
           <SparklesText
             className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
-            text="Book Your Ride"
+            text="Book Your Assistant"
           />
           <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
             Safe, reliable, and accessible transportation at your service. Book
@@ -437,7 +437,7 @@ export default function CabBookingPage() {
                   type="submit"
                   className="w-full h-11 text-base font-medium"
                 >
-                  Book Cab
+                  Book Assistant
                 </Button>
               </form>
             </Card>
