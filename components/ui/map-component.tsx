@@ -1,15 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import type {
-  Map,
-  LatLng,
-  Marker,
-  Control,
-  DivIcon,
-  TileLayer,
-  RoutingControl,
-} from "leaflet";
+import type { Map, LatLng, Marker, Control, DivIcon, TileLayer } from "leaflet";
 
 interface Location {
   lat: number;
@@ -42,7 +34,7 @@ export default function MapComponent({
   onRouteUpdate,
 }: MapComponentProps) {
   const mapRef = useRef<Map | null>(null);
-  const routingControlRef = useRef<RoutingControl | null>(null);
+  const routingControlRef = useRef<any | null>(null);
   const markersRef = useRef<{
     pickup?: Marker;
     destination?: Marker;
