@@ -40,10 +40,10 @@ interface Provider {
 
 type PageProps = {
   params: Promise<{ provider: string }>;
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export default function ProviderPage({ params }: PageProps) {
+export default function ProviderPage({ params, searchParams }: PageProps) {
   const [provider, setProvider] = React.useState<Provider | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -51,7 +51,10 @@ export default function ProviderPage({ params }: PageProps) {
   React.useEffect(() => {
     async function loadProvider() {
       try {
-        const { provider: providerId } = await params;
+        const [{ provider: providerId }, queryParams] = await Promise.all([
+          params,
+          searchParams,
+        ]);
         const providerData = takerData.find((p) => p.id === providerId);
 
         if (!providerData) {
@@ -68,7 +71,7 @@ export default function ProviderPage({ params }: PageProps) {
     }
 
     loadProvider();
-  }, [params]);
+  }, [params, searchParams]);
 
   if (loading) {
     return (
