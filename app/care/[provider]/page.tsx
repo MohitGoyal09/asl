@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +11,6 @@ import {
   Clock,
   Languages,
   Mail,
-  Phone,
   Calendar,
   Shield,
   Heart,
@@ -37,26 +38,67 @@ interface Provider {
   reviews: Review[];
 }
 
-interface PageProps {
-  params: { provider: string };
+type PageProps = {
+  params: Promise<{ provider: string }>;
   searchParams?: { [key: string]: string | string[] | undefined };
-}
+};
 
-export default async function ProviderPage({
-  params,
-  searchParams,
-}: PageProps) {
-  const { provider } = params;
+export default function ProviderPage({ params }: PageProps) {
+  const [provider, setProvider] = React.useState<Provider | null>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
 
-  const providerData = takerData.find((p) => p.id === provider);
+  React.useEffect(() => {
+    async function loadProvider() {
+      try {
+        const { provider: providerId } = await params;
+        const providerData = takerData.find((p) => p.id === providerId);
 
-  if (!providerData) {
-    notFound();
+        if (!providerData) {
+          setError("Provider not found");
+          return;
+        }
+
+        setProvider(providerData);
+      } catch (err) {
+        setError("Failed to load provider data");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadProvider();
+  }, [params]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-lg text-muted-foreground">
+          Loading provider details...
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !provider) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold text-red-500 mb-2">Error</h2>
+          <p className="text-muted-foreground">
+            {error || "Provider not found"}
+          </p>
+          <Button className="mt-4" onClick={() => window.history.back()}>
+            Go Back
+          </Button>
+        </Card>
+      </div>
+    );
   }
 
   const averageRating =
-    providerData.reviews.reduce((acc, review) => acc + review.rating, 0) /
-    providerData.reviews.length;
+    provider.reviews.reduce((acc, review) => acc + review.rating, 0) /
+    provider.reviews.length;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -71,12 +113,12 @@ export default async function ProviderPage({
                 <div className="relative">
                   <Avatar className="h-40 w-40 ring-4 ring-primary/10">
                     <AvatarImage
-                      src={providerData.profilePicture}
-                      alt={providerData.name}
+                      src={provider.profilePicture}
+                      alt={provider.name}
                       className="object-cover"
                     />
                     <AvatarFallback className="text-2xl">
-                      {providerData.name.slice(0, 2)}
+                      {provider.name.slice(0, 2)}
                     </AvatarFallback>
                   </Avatar>
                   <Badge className="absolute -bottom-2 right-0 px-4 py-1">
@@ -90,18 +132,18 @@ export default async function ProviderPage({
                 <div className="flex flex-col md:flex-row justify-between gap-4">
                   <div className="space-y-2">
                     <h1 className="text-4xl font-bold tracking-tight">
-                      {providerData.name}
+                      {provider.name}
                     </h1>
                     <div className="flex items-center gap-4 text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <MapPin className="h-4 w-4" />
-                        <span>{providerData.location}</span>
+                        <span>{provider.location}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Star className="h-4 w-4 fill-primary text-primary" />
                         <span>
-                          {averageRating.toFixed(1)} (
-                          {providerData.reviews.length} reviews)
+                          {averageRating.toFixed(1)} ({provider.reviews.length}{" "}
+                          reviews)
                         </span>
                       </div>
                     </div>
@@ -120,7 +162,7 @@ export default async function ProviderPage({
 
                 <div className="prose prose-sm max-w-none">
                   <p className="text-lg text-muted-foreground leading-relaxed">
-                    {providerData.bio}
+                    {provider.bio}
                   </p>
                 </div>
 
@@ -128,19 +170,19 @@ export default async function ProviderPage({
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="px-3 py-1">
                       <Clock className="w-4 h-4 mr-1" />
-                      {providerData.availability}
+                      {provider.availability}
                     </Badge>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="px-3 py-1">
                       <Languages className="w-4 h-4 mr-1" />
-                      {providerData.languages.join(", ")}
+                      {provider.languages.join(", ")}
                     </Badge>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="px-3 py-1 bg-primary/5">
-                      <Award className="w-4 h-4 mr-1" />$
-                      {providerData.hourlyRate}/hr
+                      <Award className="w-4 h-4 mr-1" />${provider.hourlyRate}
+                      /hr
                     </Badge>
                   </div>
                 </div>
@@ -161,7 +203,7 @@ export default async function ProviderPage({
                 Expertise & Specializations
               </h2>
               <div className="flex flex-wrap gap-2">
-                {providerData.specializations.map((spec) => (
+                {provider.specializations.map((spec) => (
                   <Badge
                     key={spec}
                     variant="secondary"
@@ -178,13 +220,13 @@ export default async function ProviderPage({
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-semibold">Client Reviews</h2>
                 <Badge variant="secondary" className="px-3 py-1">
-                  {providerData.reviews.length} Reviews
+                  {provider.reviews.length} Reviews
                 </Badge>
               </div>
 
               <div className="space-y-6">
-                {providerData.reviews.length > 0 ? (
-                  providerData.reviews.map((review, index) => (
+                {provider.reviews.length > 0 ? (
+                  provider.reviews.map((review, index) => (
                     <div
                       key={index}
                       className="bg-muted/50 rounded-lg p-4 transition-colors hover:bg-muted/70"
@@ -228,14 +270,12 @@ export default async function ProviderPage({
                 <div className="flex justify-between items-center py-2 border-b">
                   <span className="text-muted-foreground">Hourly Rate</span>
                   <span className="font-semibold">
-                    ${providerData.hourlyRate}/hr
+                    ${provider.hourlyRate}/hr
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b">
                   <span className="text-muted-foreground">Availability</span>
-                  <span className="font-medium">
-                    {providerData.availability}
-                  </span>
+                  <span className="font-medium">{provider.availability}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b">
                   <span className="text-muted-foreground">Response Time</span>
