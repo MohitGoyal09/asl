@@ -63,11 +63,11 @@ const availability = [
   { value: "flexible", label: "Flexible" },
 ];
 
-interface PageProps {
-  searchParams: { [key: string]: string | string[] | undefined };
+interface CarePageProps {
+  searchParams?: { [key: string]: string | string[] | undefined };
 }
 
-export default function CarePage({ searchParams }: PageProps) {
+export default function CarePage({ searchParams = {} }: CarePageProps) {
   const [providers, setProviders] = React.useState<Provider[]>(
     takerData as Provider[]
   );
@@ -104,8 +104,6 @@ export default function CarePage({ searchParams }: PageProps) {
 
       if (requirements) {
         const filteredProviders = takerData.filter((provider) => {
-          // Add your filtering logic here based on requirements
-          // This is a simple example - enhance based on your needs
           return provider.specializations.some((spec) =>
             requirements.boarding
               ? spec.includes("Mobility")
