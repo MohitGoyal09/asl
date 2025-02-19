@@ -62,8 +62,8 @@ const testimonials = [
 export function Testimonials() {
   return (
     <TestimonialsSection
-      title="Trusted by healthcare professionals and patients"
-      description="Join thousands of users who are already experiencing better healthcare with MediConnect"
+      title="Trusted by our community of users and care providers"
+      description="Join thousands who are breaking down communication barriers and accessing better care with Eyelink"
       testimonials={testimonials}
     />
   );
