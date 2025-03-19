@@ -10,8 +10,8 @@ export default function PricingPage() {
       plans={[
         {
           name: "Basic",
-          price: "29",
-          yearlyPrice: "279",
+          price: "2499",
+          yearlyPrice: "2199",
           period: "month",
           features: [
             "Basic ASL Translation (30 mins/day)",
@@ -29,8 +29,8 @@ export default function PricingPage() {
         },
         {
           name: "Pro",
-          price: "49",
-          yearlyPrice: "469",
+          price: "3499",
+          yearlyPrice: "3199",
           period: "month",
           features: [
             "Unlimited ASL Translation",
@@ -49,8 +49,8 @@ export default function PricingPage() {
         },
         {
           name: "Enterprise",
-          price: "99",
-          yearlyPrice: "949",
+          price: "4299",
+          yearlyPrice: "4199",
           period: "month",
           features: [
             "Enterprise-grade Translation",

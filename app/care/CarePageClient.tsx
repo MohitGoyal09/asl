@@ -184,12 +184,10 @@ export default function CarePageClient({
       {/* Page Header */}
       <div className="relative text-center mb-16 container max-w-7xl mx-auto px-6">
         <div className="space-y-12">
-          <SparklesText
-            className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
-            text={
-              bookingDetails ? "Recommended Assistants" : "Our Care Assistants"
-            }
-          />
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+            {bookingDetails ? "Recommended Assistants" : "Our Care Assistants"}
+          </h1>
+          
           {bookingDetails && (
             <div className="flex flex-wrap gap-4 justify-center items-center">
               <Badge variant="secondary" className="px-4 py-2 text-base">

@@ -15,9 +15,9 @@ export default function Home() {
       <Pricing
         plans={[
           {
-            name: "Basic",
-            price: "29",
-            yearlyPrice: "279",
+            name: "Asl",
+            price: "299",
+            yearlyPrice: "199",
             period: "month",
             features: [
               "Basic ASL Translation",
@@ -30,32 +30,36 @@ export default function Home() {
             isPopular: false,
           },
           {
-            name: "Pro",
-            price: "49",
-            yearlyPrice: "469",
+            name: "Audio Navigation",
+            price: "499",
+            yearlyPrice: "399",
             period: "month",
             features: [
-              "Advanced ASL Translation",
-              "Priority Support",
-              "Mobile Access",
-              "Custom Signs",
+              "Real-time Audio Navigation",
+              "Object & Obstacle Detection",
+              "Voice Guidance",
+              "Location Mapping",
             ],
-            description: "Ideal for active learners and professionals",
+            description: "Asl + Audio Navigation",
             buttonText: "Start Pro",
             href: "/signup-pro",
             isPopular: true,
           },
           {
-            name: "Enterprise",
-            price: "99",
-            yearlyPrice: "949",
+            name: "Asl + Audio Navigation",
+            price: "799",
+            yearlyPrice: "699",
             period: "month",
             features: [
-              "Enterprise ASL Translation",
-              "Dedicated Support",
-              "Mobile Access",
-              "Custom Signs",
-              "API Access",
+              "Premium ASL Translation",
+              "Real-time Audio Navigation",
+              "Object & Obstacle Detection",
+              "Voice Guidance",
+              "Location Mapping",
+              "24/7 Priority Support",
+              "Mobile & Desktop Access",
+              "Custom ASL Signs",
+              "API Integration",
             ],
             description: "For organizations and institutions",
             buttonText: "Contact Sales",
@@ -65,7 +69,6 @@ export default function Home() {
         ]}
       />
       <Testimonials />
-      
     </>
   );
 }

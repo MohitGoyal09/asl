@@ -47,6 +47,11 @@ export default function Header() {
       description: "Find and connect with dedicated care personnel",
     },
     {
+      title: "Audio Navigation",
+      href : "/audioNav",
+      description: "Auto Navigate your way",
+    },
+    {
       title: "More", // Group less primary links under "More" for cleaner top-level nav
       href: "#", // Added href for "More" - using '#' as a placeholder as it's a dropdown trigger
       items: [

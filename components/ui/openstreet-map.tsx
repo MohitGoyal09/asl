@@ -9,11 +9,19 @@ interface Location {
   address: string;
 }
 
+interface SelectionMode {
+  type: "pickup" | "destination";
+  lat: number;
+  lng: number;
+  address: string;
+}
+
 interface OpenStreetMapProps {
   onLocationSelect: (location: Location) => void;
   pickup?: Location;
   destination?: Location;
   onRouteUpdate: (info: { distance: number; duration: number }) => void;
+  selectedLocation?: SelectionMode | null;
 }
 
 // Create a client-side only version of the map

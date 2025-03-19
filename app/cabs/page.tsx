@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,20 +21,35 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, Clock } from "lucide-react";
+import {
+  Calendar as CalendarIcon,
+  MapPin,
+  Clock,
+  Navigation,
+} from "lucide-react";
 import { SparklesText } from "@/components/magicui/sparkles-text";
 import { OpenStreetMap } from "@/components/ui/openstreet-map";
 import { useRouter } from "next/navigation";
 
+// Define the SelectionMode interface
+interface SelectionMode {
+  type: "pickup" | "destination";
+  lat: number;
+  lng: number;
+  address: string;
+}
+
+interface Location {
+  lat: number;
+  lng: number;
+  address: string;
+}
+
 export default function CabBookingPage() {
   const router = useRouter();
   const [date, setDate] = useState<Date>();
-  const [selectedLocation, setSelectedLocation] = useState<{
-    type: "pickup" | "destination";
-    lat: number;
-    lng: number;
-    address: string;
-  } | null>(null);
+  const [selectedLocation, setSelectedLocation] =
+    useState<SelectionMode | null>(null);
   const [routeInfo, setRouteInfo] = useState<{
     distance: number;
     duration: number;
@@ -72,6 +87,19 @@ export default function CabBookingPage() {
     pickupCoords: { lat: 0, lng: 0 },
     destinationCoords: { lat: 0, lng: 0 },
   });
+  const [showUseCurrentLocation, setShowUseCurrentLocation] = useState(false);
+  const [hasGeolocation, setHasGeolocation] = useState(false);
+
+  // Check if geolocation is available
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      setHasGeolocation(true);
+      // Show the current location suggestion if pickup is empty
+      if (!bookingData.pickup) {
+        setShowUseCurrentLocation(true);
+      }
+    }
+  }, [bookingData.pickup]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -83,11 +111,7 @@ export default function CabBookingPage() {
     }));
   };
 
-  const handleLocationSelect = (location: {
-    lat: number;
-    lng: number;
-    address: string;
-  }) => {
+  const handleLocationSelect = (location: Location) => {
     if (selectedLocation) {
       const type = selectedLocation.type;
       setBookingData((prev) => ({
@@ -96,6 +120,11 @@ export default function CabBookingPage() {
         [`${type}Coords`]: { lat: location.lat, lng: location.lng },
       }));
       setSelectedLocation(null);
+      setShowUseCurrentLocation(false);
+
+      toast.success(
+        `${type.charAt(0).toUpperCase() + type.slice(1)} location set!`
+      );
     }
   };
 
@@ -133,6 +162,17 @@ export default function CabBookingPage() {
         surgeCharge: undefined,
       },
     });
+  };
+
+  const useCurrentLocation = () => {
+    const selectionMode: SelectionMode = {
+      type: "pickup",
+      lat: 0,
+      lng: 0,
+      address: "",
+    };
+    setSelectedLocation(selectionMode);
+    setShowUseCurrentLocation(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -202,27 +242,44 @@ export default function CabBookingPage() {
     }
   };
 
+  // Update the map pin click handlers
+  const handlePickupClick = () => {
+    const selectionMode: SelectionMode = {
+      type: "pickup",
+      lat: 0,
+      lng: 0,
+      address: "",
+    };
+    setSelectedLocation(selectionMode);
+  };
+
+  const handleDestinationClick = () => {
+    const selectionMode: SelectionMode = {
+      type: "destination",
+      lat: 0,
+      lng: 0,
+      address: "",
+    };
+    setSelectedLocation(selectionMode);
+  };
+
   return (
-    <div className="mt-24">
-      {/* Page Header */}
-      <div className="relative text-center mb-16 container max-w-7xl mx-auto px-6">
-        <div className="space-y-12">
-          <SparklesText
-            className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
-            text="Book Your Assistant"
-          />
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
-            Safe, reliable, and accessible transportation at your service. Book
-            a ride with our specially trained drivers and accessible vehicles.
-          </p>
-        </div>
+    <div className="mt-16">
+      {/* Simplified Page Header */}
+      <div className="text-center mb-10 container max-w-5xl mx-auto px-6">
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+          Book Your Assistant
+        </h1>
+        <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+          Safe, reliable, and accessible transportation at your service.
+        </p>
       </div>
 
       <div className="container max-w-7xl mx-auto px-6 pb-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Booking Form */}
           <div className="space-y-6">
-            <Card className="p-6 shadow-lg">
+            <Card className="p-6 shadow-md">
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Location Fields */}
                 <div className="space-y-4">
@@ -242,18 +299,22 @@ export default function CabBookingPage() {
                         type="button"
                         variant="outline"
                         className="flex-shrink-0"
-                        onClick={() =>
-                          setSelectedLocation({
-                            type: "pickup",
-                            lat: 0,
-                            lng: 0,
-                            address: "",
-                          })
-                        }
+                        onClick={handlePickupClick}
                       >
                         <MapPin className="h-5 w-5" />
                       </Button>
                     </div>
+                    {showUseCurrentLocation && hasGeolocation && (
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="text-primary text-sm p-0 h-auto flex gap-1 items-center"
+                        onClick={useCurrentLocation}
+                      >
+                        <Navigation className="h-3 w-3" />
+                        Use my current location
+                      </Button>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -270,14 +331,7 @@ export default function CabBookingPage() {
                         type="button"
                         variant="outline"
                         className="flex-shrink-0"
-                        onClick={() =>
-                          setSelectedLocation({
-                            type: "destination",
-                            lat: 0,
-                            lng: 0,
-                            address: "",
-                          })
-                        }
+                        onClick={handleDestinationClick}
                       >
                         <MapPin className="h-5 w-5" />
                       </Button>
@@ -440,6 +494,7 @@ export default function CabBookingPage() {
                 <Button
                   type="submit"
                   className="w-full h-11 text-base font-medium"
+                  onClick={() => router.push('/care')}
                 >
                   Book Assistant
                 </Button>
@@ -449,7 +504,7 @@ export default function CabBookingPage() {
 
           {/* Map Section */}
           <div className="space-y-6">
-            <Card className="p-6 shadow-lg">
+            <Card className="p-6 shadow-md">
               <div className="aspect-[4/3] bg-muted rounded-lg overflow-hidden">
                 <OpenStreetMap
                   onLocationSelect={handleLocationSelect}
@@ -472,17 +527,23 @@ export default function CabBookingPage() {
                       : undefined
                   }
                   onRouteUpdate={handleRouteUpdate}
+                  selectedLocation={selectedLocation}
                 />
               </div>
               {selectedLocation && (
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Click on the map to select {selectedLocation.type} location
-                </p>
+                <div className="mt-2 p-2 bg-muted rounded-md border">
+                  <p className="text-sm flex items-center">
+                    <MapPin className="h-4 w-4 mr-1 text-primary" />
+                    {selectedLocation.lat === 0 && selectedLocation.lng === 0
+                      ? `Using your current location as ${selectedLocation.type} point`
+                      : `Click on the map to select ${selectedLocation.type} location`}
+                  </p>
+                </div>
               )}
             </Card>
 
             {/* Estimated Fare Card */}
-            <Card className="p-6 shadow-lg">
+            <Card className="p-6 shadow-md">
               <h3 className="font-semibold text-lg mb-4">Estimated Fare</h3>
               <div className="space-y-2">
                 <div className="flex justify-between">
