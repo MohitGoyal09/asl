@@ -206,7 +206,7 @@ export default function MapComponent({
                          </svg>
                        </a>`;
 
-      div.onclick = function (e) {
+      div.onclick = function (e: MouseEvent) {
         e.preventDefault();
         e.stopPropagation();
         if (currentLocation) {
