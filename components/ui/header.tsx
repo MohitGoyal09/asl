@@ -36,19 +36,19 @@ export default function Header() {
       description: "Translate sign language to text/speech and vice versa",
     },
     {
-      title: "Travel Assistant",
+      title: "Book Assistant",
       href: "/cabs",
       description:
         "Book accessible transportation for differently-abled people",
     },
     {
-      title: "Care Providers",
+      title: "Travel Assistants",
       href: "/care",
       description: "Find and connect with dedicated care personnel",
     },
     {
       title: "Audio Navigation",
-      href : "/audioNav",
+      href: "/audioNav",
       description: "Auto Navigate your way",
     },
     {
